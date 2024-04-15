@@ -1,0 +1,25 @@
+{
+  "name": "nasa-project",
+  "version": "1.0.0",
+  "description": "NASA MISSION CONTROL",
+  "main": "index.js",
+  "scripts": {
+    "install-server": "npm install --prefix server",
+    "install-nasa-front-end": "npm install --prefix nasa-front-end",
+    "install": "npm run install-server && npm run install-nasa-front-end",
+    "server": "npm run watch --prefix server",
+    "nasa-front-end": "npm start --prefix nasa-front-end",
+    "watch": "npm run server & npm run nasa-front-end",
+    "deploy": "npm run build --prefix nasa-front-end && npm start --prefix server",
+    "test": "npm run test --prefix server && npm run test --prefix nasa-front-end"
+  },
+  "author": "Harshit Sharma",
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  },
+  "dependencies": {
+    "morgan": "^1.10.0",
+    "url": "^0.11.3"
+  }
+}
