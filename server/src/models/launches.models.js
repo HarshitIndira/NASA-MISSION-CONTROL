@@ -1,3 +1,5 @@
+const launchesDatabase = require('./launches.mongo');
+
 const launches = new Map();
 let latestFlightNumber = 100;
 
@@ -7,44 +9,60 @@ const launch = {
     rocket: "Explorer IS1",
     launchDate: new Date('December 15, 2077'),
     target: "Kepler-442 b",
-    customer: [
+    customers: [
         "NASA", "LIM"
     ],
     upcoming: true,
     success: true,
+
 };
 
-launches.set(launch.flightNumber, launch);
+saveLaunches(launch);
 
-function existsLaunchWithId(launchId) {
-    return launches.has(launchId);
+async function existsLaunchWithId(launchId) {
+    return await launchesDatabase.findOne({
+        flightNumber: launchId,
+    });
 }
 
-function getAllLaunches() {
-    return Array.from(launches.values());
+async function saveLaunches(launch) {
+    await launchesDatabase.updateOne({
+        flightNumber: launch.flightNumber,
+    }, launch, {
+        upsert: true,
+    })
+}
+async function getAllLaunches() {
+    return await launchesDatabase.find({}, { '_id': 0, '__v': 0 });
 }
 
-function addNewLaunch(launch) {
-    console.log(launch)
-    latestFlightNumber++;
-    launches.set(latestFlightNumber, Object.assign(launch, {
+
+async function scheduleNewLaunch(launch) {
+    const newFlightNumber = latestFlightNumber++;
+
+    const newLaunch = Object.assign(launch, {
         success: true,
         upcoming: true,
-        customers: ['ZTM', 'NASA'],
-        flightNumber: latestFlightNumber,
-    }));
+        customers: ['Zero to Mastery', 'NASA'],
+        flightNumber: newFlightNumber,
+    });
+
+    await saveLaunches(newLaunch);
 }
 
-function abortLaunchById(launchid) {
-    console.log('abortLaunchById ', launchid)
-    const aborted = launches.get(launchid);
-    aborted.upcoming = false;
-    aborted.success = false;
-    return aborted;
+async function abortLaunchById(launchid) {
+    const aborted = await launchesDatabase.updateOne({
+        flightNumber: launchid,
+    }, {
+        upcoming: false,
+        success: false,
+    });
+
+    return aborted.modifiedCount === 1;
 }
 
 module.exports = {
-    addNewLaunch,
+    scheduleNewLaunch,
     getAllLaunches,
     existsLaunchWithId,
     abortLaunchById,
