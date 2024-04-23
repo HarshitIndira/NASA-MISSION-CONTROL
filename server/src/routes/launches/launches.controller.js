@@ -1,7 +1,11 @@
 const { getAllLaunches, existsLaunchWithId, abortLaunchById, scheduleNewLaunch } = require('../../models/launches.models');
 
+const getPagination = require('../../services/query')
+
 async function httpGetAllLaunches(req, resp) {
-    const launches = await getAllLaunches();// Call the function to get the array of launches
+    // console.log(req.query);
+    const { skip, limit } = getPagination(req.query);
+    const launches = await getAllLaunches(skip, limit);// Call the function to get the array of launches
     return resp.status(200).json(launches); // Return the launches array as JSON
 }
 
