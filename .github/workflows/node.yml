@@ -15,6 +15,29 @@
 #           node-version: "20"
 #       - run: npm install
 #       - run: npm run build --prefix client
+# name: NASA Project CI
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     branches: [main]
+# jobs:
+#   build:
+#     runs-on: windows-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: Use Node.js version 20
+#         uses: actions/setup-node@v2
+#         with:
+#           node-version: "20"
+#       - run: npm install
+#       - run: npm run build --prefix client
+#       - name: Fix permissions
+#         run: |
+#           npm config set cache "C:\npm-cache" --global
+#           npm config set prefix "C:\npm-global" --global
+#           npm install -g npm
+#           npm rebuild
 name: NASA Project CI
 on:
   push:
@@ -30,11 +53,22 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "20"
-      - run: npm install
-      - run: npm run build --prefix client
-      - name: Fix permissions
+      - name: Check Node.js and npm versions
         run: |
-          npm config set cache "C:\npm-cache" --global
-          npm config set prefix "C:\npm-global" --global
-          npm install -g npm
-          npm rebuild
+          node --version
+          npm --version
+      - name: Cache npm modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+      - name: Clean npm cache
+        run: npm cache clean --force
+      - name: Install server dependencies
+        run: npm install --prefix server --unsafe-perm=true --allow-root
+      - name: Install NASA front-end dependencies
+        run: npm install --prefix nasa-front-end --unsafe-perm=true --allow-root
+      - name: Build NASA front-end
+        run: npm run build --prefix nasa-front-end
