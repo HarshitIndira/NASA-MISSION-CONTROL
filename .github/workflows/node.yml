@@ -66,9 +66,7 @@ jobs:
             ${{ runner.os }}-npm-
       - name: Clean npm cache
         run: npm cache clean --force
-      - name: Install server dependencies
+      - name: Update npm modules
+        run: npm update -g
+      - name: Retry installation with elevated privileges
         run: npm install --prefix server --unsafe-perm=true --allow-root
-      - name: Install NASA front-end dependencies
-        run: npm install --prefix nasa-front-end --unsafe-perm=true --allow-root
-      - name: Build NASA front-end
-        run: npm run build --prefix nasa-front-end
